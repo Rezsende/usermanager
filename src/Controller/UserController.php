@@ -44,13 +44,14 @@ final class UserController extends AbstractController
 
   
 
-    #[Route('/users', name: 'criar_user', methods: ['POST'])]
-    public function criar(Request $request): JsonResponse
-    {
+  #[Route('/users', name: 'criar_user', methods: ['POST'])]
+public function criar(Request $request): JsonResponse
+{
+    try {
         $dados = json_decode($request->getContent(), true);
 
-        if (!isset($dados['name'], $dados['email'], $dados['password'])) {
-            return $this->json(['error' => 'Campos obrigatórios: name, email, password'], 400);
+        if (empty($dados['name']) || empty($dados['email']) || empty($dados['password'])) {
+            return $this->json(['error' => 'Todos os campos são obrigatórios'], 400);
         }
 
         $user = $this->userService->criar($dados);
@@ -60,6 +61,12 @@ final class UserController extends AbstractController
             'name' => $user->getName(),
             'email' => $user->getEmail(),
         ], 201);
+
+    } catch (\RuntimeException $e) {
+        return $this->json(['error' => $e->getMessage()], $e->getCode());
+    } catch (\Exception $e) {
+        return $this->json(['error' => 'Erro interno no servidor'], 500);
     }
+}
 
 }
