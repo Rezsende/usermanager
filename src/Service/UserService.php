@@ -27,55 +27,42 @@ class UserService implements UserServiceInterface
     }
 
     
-public function criar(array $dados): User
+    public function criar(array $dados): User
+    {
+        
+        if (empty($dados['name']) || empty($dados['email']) || empty($dados['password'])) {
+            throw new \RuntimeException('Todos os campos são obrigatórios', 400);
+        }
+
+    
+        if ($this->userRepository->findOneBy(['email' => $dados['email']])) {
+            throw new \RuntimeException('E-mail já cadastrado', 409);
+        }
+
+        
+        if (!filter_var($dados['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new \RuntimeException('E-mail inválido', 400);
+        }
+
+        $user = new User();
+        $user->setName($dados['name']);
+        $user->setEmail($dados['email']);
+        $user->setPassword(password_hash($dados['password'], PASSWORD_BCRYPT));
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        return $user;
+    }
+
+
+    public function buscarPorId(int $id): ?User
 {
-    
-    if (empty($dados['name']) || empty($dados['email']) || empty($dados['password'])) {
-        throw new \RuntimeException('Todos os campos são obrigatórios', 400);
-    }
-
-  
-    if ($this->userRepository->findOneBy(['email' => $dados['email']])) {
-        throw new \RuntimeException('E-mail já cadastrado', 409);
-    }
-
-    
-    if (!filter_var($dados['email'], FILTER_VALIDATE_EMAIL)) {
-        throw new \RuntimeException('E-mail inválido', 400);
-    }
-
-    $user = new User();
-    $user->setName($dados['name']);
-    $user->setEmail($dados['email']);
-    $user->setPassword(password_hash($dados['password'], PASSWORD_BCRYPT));
-
-    $this->entityManager->persist($user);
-    $this->entityManager->flush();
-
-    return $user;
+    return $this->userRepository->find($id);
 }
 
 
-
-
-
-
-
-
-
-
-    // public function buscarPorId(int $id): ?Pessoa
-    // {
-    //     return $this->pessoaRepository->find($id);
-    // }
-
-    // public function criar(Pessoa $pessoa): Pessoa
-    // {
-    //     $this->entityManager->persist($pessoa);
-    //     $this->entityManager->flush();
-
-    //     return $pessoa;
-    // }
+    
 
     // public function atualizar(Pessoa $pessoa): Pessoa
     // {

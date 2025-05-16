@@ -42,6 +42,27 @@ final class UserController extends AbstractController
       return $this->json($data, 200, [], ['json_encode_options' => JSON_UNESCAPED_UNICODE]);
     }
 
+
+    #[Route('/user/{id}', name: 'buscar_usuario', methods: ['GET'])]
+    public function buscarPorId(int $id): JsonResponse
+    {
+        $user = $this->userService->buscarPorId($id);
+
+        if (!$user) {
+            return $this->json([
+                'message' => 'Usuário não encontrado.',
+                'status' => 404,
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $data = [
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+        ];
+
+        return $this->json($data, 200, [], ['json_encode_options' => JSON_UNESCAPED_UNICODE]);
+    }
   
 
   #[Route('/users', name: 'criar_user', methods: ['POST'])]
