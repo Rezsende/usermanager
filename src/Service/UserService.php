@@ -1,6 +1,7 @@
 <?php
 namespace App\Service;
 
+use App\Entity\User; 
 use App\Interface\UserServiceInterface;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,6 +21,22 @@ class UserService implements UserServiceInterface
     {
         return $this->userRepository->findAll();
     }
+
+    
+
+    public function criar(array $dados): User
+    {
+        $user = new User();
+        $user->setName($dados['name'] ?? null);
+        $user->setEmail($dados['email'] ?? null);
+        $user->setPassword(password_hash($dados['password'], PASSWORD_BCRYPT));
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        return $user;
+    }
+
 
     // public function buscarPorId(int $id): ?Pessoa
     // {

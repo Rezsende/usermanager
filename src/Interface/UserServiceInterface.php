@@ -10,4 +10,5 @@ interface UserServiceInterface
      * @return User[]
      */
     public function listarTodos(): array;
+    public function criar(array $dados): User;
 }
