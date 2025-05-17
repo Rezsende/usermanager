@@ -23,7 +23,12 @@ class UserService implements UserServiceInterface
 
     public function listarTodos(): array
     {
+       try{ 
         return $this->userRepository->findAll();
+    }
+       catch(\Exception $e){
+        return [];
+       }
     }
 
     
@@ -57,23 +62,43 @@ class UserService implements UserServiceInterface
 
 
     public function buscarPorId(int $id): ?User
-{
-    return $this->userRepository->find($id);
-}
+    {
+        try {
+             return $this->userRepository->find($id);
+        }catch (\Exception $e) {
+            return $e;
+        }
+    }
 
 
-    
+    public function atualizarPorId(int $id, array $dados): User
+    {
+        $user = $this->userRepository->find($id);
 
-    // public function atualizar(Pessoa $pessoa): Pessoa
-    // {
-    //     $this->entityManager->flush();
+        if (!$user) {
+            throw new \RuntimeException('Usuário não encontrado', 404);
+        }
 
-    //     return $pessoa;
-    // }
+        if (empty($dados['name']) || empty($dados['email']) || empty($dados['password'])) {
+            throw new \RuntimeException('Todos os campos são obrigatórios', 400);
+        }
 
-    // public function remover(Pessoa $pessoa): void
-    // {
-    //     $this->entityManager->remove($pessoa);
-    //     $this->entityManager->flush();
-    // }
+     
+       
+
+        if (!filter_var($dados['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new \RuntimeException('E-mail inválido', 400);
+        }
+
+        $user->setName($dados['name']);
+        $user->setEmail($dados['email']);
+        $user->setPassword(password_hash($dados['password'], PASSWORD_BCRYPT));
+
+        $this->entityManager->flush();
+
+        return $user;
+    }
+
+
+   
 }

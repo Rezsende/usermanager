@@ -11,5 +11,8 @@ interface UserServiceInterface
      */
     public function listarTodos(): array;
     public function criar(array $dados): User;
-   public function buscarPorId(int $id): ?User;
+    public function buscarPorId(int $id): ?User;
+   public function atualizarPorId(int $id, array $dados): ?User;
+
+
 }

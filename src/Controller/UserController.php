@@ -8,7 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Component\HttpFoundation\Response;
 final class UserController extends AbstractController
 {
      private UserServiceInterface $userService;
@@ -85,6 +85,32 @@ public function criar(Request $request): JsonResponse
 
     } catch (\RuntimeException $e) {
         return $this->json(['error' => $e->getMessage()], $e->getCode());
+    } catch (\Exception $e) {
+        return $this->json(['error' => 'Erro interno no servidor'], 500);
+    }
+}
+
+
+#[Route('/users/{id}', methods: ['PUT'])]
+public function update(int $id, Request $request): JsonResponse
+{
+    try {
+        $dados = json_decode($request->getContent(), true);
+
+        if (empty($dados['name']) || empty($dados['email']) || empty($dados['password'])) {
+            return $this->json(['error' => 'Todos os campos são obrigatórios'], 400);
+        }
+
+        $user = $this->userService->atualizarPorId($id, $dados);
+
+        return $this->json([
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+        ], 200);
+
+    } catch (\RuntimeException $e) {
+        return $this->json(['error' => $e->getMessage()], $e->getCode() ?: 400);
     } catch (\Exception $e) {
         return $this->json(['error' => 'Erro interno no servidor'], 500);
     }
